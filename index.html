@@ -2,81 +2,85 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>SeñaVoz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
-:root{--bg:#F4F6F8;--ink:#10243A;--muted:#566677;--panel:#FFFFFF;--line:#D3DBE3;--accent:#1B4F8A;--on-accent:#FFFFFF;--sig:#F2B632;--cap-bg:rgba(10,20,32,.84);--cap-ink:#FFFFFF;--cap:22px;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#F4F6F8;--ink:#10243A;--muted:#566677;--panel:#FFFFFF;--line:#D3DBE3;--accent:#1B4F8A;--on-accent:#FFFFFF;--sig:#F2B632;--cap-bg:rgba(10,20,32,.84);--cap-ink:#FFFFFF;--cap:22px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1520;--ink:#EAF0F6;--muted:#93A3B5;--panel:#142233;--line:#26384D;--accent:#8FBBF2;--on-accent:#0C1520}}
 :root[data-theme="dark"]{--bg:#0C1520;--ink:#EAF0F6;--muted:#93A3B5;--panel:#142233;--line:#26384D;--accent:#8FBBF2;--on-accent:#0C1520}
 *{box-sizing:border-box}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.45}
-main{max-width:720px;margin:0 auto;padding:14px 14px 190px}
-h1{font-size:22px;margin:4px 0 2px}
-.sub{color:var(--muted);margin:0 0 12px;font-size:15px}
-.stage{position:relative;aspect-ratio:4/3;background:#0A141F;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.45;display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top,0px)}
+header{padding:8px 14px 0;flex-shrink:0}
+h1{font-size:20px;margin:0}
+#lobby{flex:1;overflow-y:auto;padding:8px 14px 20px;max-width:720px;width:100%;margin:0 auto}
+#call{display:none;flex:1;min-height:0;flex-direction:column;max-width:720px;width:100%;margin:0 auto;padding:0 14px}
+.stage{position:relative;flex-shrink:0;height:clamp(150px,36dvh,420px);background:#0A141F;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin-top:6px}
 video{display:none;object-fit:cover}
 #rv{width:100%;height:100%}
-#lv{position:absolute;top:8px;right:8px;width:30%;aspect-ratio:3/4;border-radius:10px;border:2px solid var(--sig);transform:scaleX(-1);background:#000}
+#lv{position:absolute;top:8px;right:8px;height:42%;aspect-ratio:3/4;border-radius:10px;border:2px solid var(--sig);transform:scaleX(-1);background:#000}
 .empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#C9D6E3}
-.cap{position:absolute;left:8px;right:8px;bottom:8px;background:var(--cap-bg);color:var(--cap-ink);border-radius:10px;padding:10px 12px;font-size:var(--cap);line-height:1.3;display:none}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-button{font:inherit;border-radius:10px;border:2px solid var(--accent);background:transparent;color:var(--accent);padding:11px 14px;min-height:48px;cursor:pointer}
+.cap{position:absolute;left:8px;right:8px;bottom:8px;background:var(--cap-bg);color:var(--cap-ink);border-radius:10px;padding:8px 12px;font-size:var(--cap);line-height:1.3;display:none;max-height:60%;overflow:auto}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+#call .row{flex-shrink:0;margin:8px 0 4px}
+button{font:inherit;border-radius:10px;border:2px solid var(--accent);background:transparent;color:var(--accent);padding:10px 14px;min-height:46px;cursor:pointer}
 button.main-btn,button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
 button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-offset:2px}
-.hint{color:var(--muted);font-size:15px;margin:0 0 8px}
-#log{display:flex;flex-direction:column;gap:8px;margin-top:6px}
-.msg{max-width:88%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:calc(var(--cap) - 2px)}
+.hint{color:var(--muted);font-size:15px;margin:0 0 6px;flex-shrink:0}
+#log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 8px}
+.msg{max-width:88%;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:calc(var(--cap) - 2px)}
 .msg small{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}
 .msg.mine{align-self:flex-end;border-color:var(--accent)}
-.compose{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:none}
+.compose{display:none;flex-shrink:0;background:var(--panel);border-top:1px solid var(--line);padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px))}
 .compose .in{max-width:720px;margin:0 auto}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
-.chips button{white-space:nowrap;min-height:40px;padding:6px 12px;font-size:15px}
+.chips button{white-space:nowrap;min-height:38px;padding:4px 12px;font-size:15px}
 .send{display:flex;gap:8px}
-input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
-#call{display:none}
+input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
 .code{font-size:30px;font-weight:700;letter-spacing:.12em}
+.who{display:flex;gap:8px;margin:8px 0}
+.who button{flex:1}
 </style>
 </head>
 <body>
-<main>
-  <h1>SeñaVoz</h1>
-  <p class="sub">Videollamada entre personas sordas y oyentes.</p>
+<header><h1>SeñaVoz</h1></header>
 
-  <section id="lobby">
-    <p>Una persona crea la sala y le comparte el código a la otra. Las dos abren esta misma página.</p>
-    <div class="row"><button class="main-btn" id="btnNew">Crear sala</button></div>
-    <form class="send" onsubmit="return false">
-      <input type="text" id="code" placeholder="Código de la sala" autocomplete="off" aria-label="Código de la sala" maxlength="12">
-      <button id="btnJoin" type="button">Entrar</button>
-    </form>
-    <p class="hint" id="lobbyMsg"></p>
-  </section>
+<section id="lobby">
+  <p>Videollamada entre personas sordas y oyentes. Primero elige quién eres tú.</p>
+  <div class="who" role="group" aria-label="¿Quién eres?">
+    <button id="rS" aria-pressed="false">Soy persona sorda</button>
+    <button id="rO" aria-pressed="false">Soy oyente</button>
+  </div>
+  <p>Una persona crea la sala y le comparte el código a la otra.</p>
+  <div class="row"><button class="main-btn" id="btnNew">Crear sala</button></div>
+  <form class="send" onsubmit="return false">
+    <input type="text" id="code" placeholder="Código de la sala" autocomplete="off" aria-label="Código de la sala" maxlength="12">
+    <button id="btnJoin" type="button">Entrar</button>
+  </form>
+  <p class="hint" id="lobbyMsg"></p>
+</section>
 
-  <section id="call">
-    <div class="stage">
-      <video id="rv" playsinline autoplay></video>
-      <video id="lv" playsinline muted autoplay></video>
-      <div class="empty" id="empty"></div>
-      <div class="cap" id="cap" aria-live="polite"></div>
-    </div>
-    <div class="row">
-      <button id="btnListen" aria-pressed="false">Subtitular mi voz</button>
-      <button id="btnVoice" aria-pressed="true">Leer en voz alta</button>
-      <button id="sm" aria-label="Letra más pequeña">A−</button>
-      <button id="lg" aria-label="Letra más grande">A+</button>
-      <button id="btnLeave">Salir</button>
-    </div>
-    <p class="hint" id="status"></p>
-    <div id="log" aria-live="polite"></div>
-  </section>
-</main>
+<section id="call">
+  <div class="stage">
+    <video id="rv" playsinline autoplay></video>
+    <video id="lv" playsinline muted autoplay></video>
+    <div class="empty" id="empty"></div>
+    <div class="cap" id="cap" aria-live="polite"></div>
+  </div>
+  <div class="row">
+    <button id="btnListen" aria-pressed="false">Subtitular mi voz</button>
+    <button id="btnVoice" aria-pressed="true">Leer en voz alta</button>
+    <button id="sm" aria-label="Letra más pequeña">A−</button>
+    <button id="lg" aria-label="Letra más grande">A+</button>
+    <button id="btnLeave">Salir</button>
+  </div>
+  <p class="hint" id="status"></p>
+  <div id="log" aria-live="polite"></div>
+</section>
 
 <div class="compose" id="compose">
   <div class="in">
@@ -91,16 +95,28 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
-  var PREFIX='senavoz-',peer=null,conn=null,mediaCall=null,stream=null,isHost=false,roomId='';
+  var PREFIX='senavoz-',peer=null,conn=null,mediaCall=null,stream=null,isHost=false;
+  var myRole='',peerRole='';
   var rec=null,listening=false,voiceOn=true,size=22,capTimer=null,lastCap=0;
+  var CHIPS={
+    sorda:['Hola, soy una persona sorda.','Más despacio, por favor.','¿Puede repetirlo?','Sí, entiendo.','No entendí.','Gracias.'],
+    oyente:['Hola, te veo y te leo.','Más despacio, por favor.','¿Puedes repetir la seña?','Entendido.','Gracias.']
+  };
+
+  /* Mantiene la pantalla fija cuando aparece el teclado */
+  if(window.visualViewport){
+    var fit=function(){document.body.style.height=window.visualViewport.height+'px';window.scrollTo(0,0)};
+    window.visualViewport.addEventListener('resize',fit);window.visualViewport.addEventListener('scroll',fit);
+  }
 
   function status(t){$('status').textContent=t}
   function lobby(t){$('lobbyMsg').textContent=t}
-  function say(cls,who,text){
-    var d=document.createElement('div');d.className='msg '+(cls==='mine'?'mine':'');
+  function say(mine,who,text){
+    var d=document.createElement('div');d.className='msg '+(mine?'mine':'');
     var s=document.createElement('small');s.textContent=who;
     var p=document.createElement('span');p.textContent=text;
-    d.appendChild(s);d.appendChild(p);$('log').appendChild(d);d.scrollIntoView({block:'nearest'});
+    d.appendChild(s);d.appendChild(p);
+    var l=$('log');l.appendChild(d);l.scrollTop=l.scrollHeight;
   }
   function showCap(t){
     var c=$('cap');c.style.display='block';c.textContent=t;
@@ -111,11 +127,33 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
       var u=new SpeechSynthesisUtterance(t);u.lang='es-CO';speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
   }
   function sendData(d){if(conn&&conn.open)conn.send(d)}
-  function empty(html,code){
+  function empty(text,code){
     var e=$('empty');e.style.display='flex';e.innerHTML='';
-    var a=document.createElement('div');a.textContent=html;e.appendChild(a);
+    var a=document.createElement('div');a.textContent=text;e.appendChild(a);
     if(code){var b=document.createElement('div');b.className='code';b.textContent=code;e.appendChild(b)}
   }
+
+  /* ---------- rol ---------- */
+  function pickRole(r){
+    myRole=r;
+    $('rS').setAttribute('aria-pressed',r==='sorda'?'true':'false');
+    $('rO').setAttribute('aria-pressed',r==='oyente'?'true':'false');
+    lobby('');
+  }
+  $('rS').onclick=function(){pickRole('sorda')};
+  $('rO').onclick=function(){pickRole('oyente')};
+  function applyRole(){
+    var sorda=myRole==='sorda';
+    $('btnListen').style.display=sorda?'none':'';
+    $('btnVoice').style.display=sorda?'none':'';
+    voiceOn=!sorda;
+    var ch=$('chips');ch.innerHTML='';
+    CHIPS[myRole].forEach(function(t){
+      var b=document.createElement('button');b.type='button';b.textContent=t;
+      b.onclick=function(){send(t)};ch.appendChild(b);
+    });
+  }
+  function peerLabel(){return peerRole==='sorda'?'Persona sorda':peerRole==='oyente'?'Oyente':'La otra persona'}
 
   /* ---------- cámara ---------- */
   function blankStream(){
@@ -139,19 +177,29 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
   }
   function attachConn(c){
     conn=c;
-    c.on('open',function(){status('Conectados. Toca “Subtitular mi voz” si vas a hablar.');if(!isHost)empty('Conectando video…')});
+    c.on('open',function(){
+      sendData({k:'role',r:myRole});
+      status('Conectados.');if(!isHost)empty('Conectando video…');
+    });
     c.on('data',function(x){
-      if(!x||typeof x.t!=='string')return;var t=x.t.slice(0,500);
-      if(x.k==='cap'){showCap(t);if(x.f)say('','Voz',t)}
-      else if(x.k==='txt'){say('','Escrito',t);speak(t)}
+      if(!x)return;
+      if(x.k==='role'&&(x.r==='sorda'||x.r==='oyente')){
+        peerRole=x.r;
+        status('Conectado con '+(x.r==='sorda'?'una persona sorda':'una persona oyente')+'.');
+        return;
+      }
+      if(typeof x.t!=='string')return;var t=x.t.slice(0,500);
+      if(x.k==='cap'){showCap(t);if(x.f)say(false,'Oyente (voz)',t)}
+      else if(x.k==='txt'){say(false,peerLabel(),t);speak(t)}
     });
     c.on('close',function(){status('La otra persona salió.')});
   }
   function enter(code,host){
+    if(!myRole){lobby('Primero elige si eres persona sorda u oyente.');return}
     code=(code||'').toLowerCase().replace(/[^a-z0-9]/g,'');
     if(code.length<3){lobby('Escribe un código de al menos 3 letras o números.');return}
     if(!window.Peer){lobby('No se pudo cargar el conector. Revisa tu internet.');return}
-    isHost=host;roomId=code;lobby('Entrando…');
+    isHost=host;lobby('Entrando…');
     startCam().then(function(camMsg){
       peer=host?new Peer(PREFIX+code):new Peer();
       peer.on('error',function(e){
@@ -160,7 +208,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
         else status('Problema de conexión: '+e.type);
       });
       peer.on('open',function(){
-        show(true);
+        show(true);applyRole();
         status(camMsg||'Listo.');
         if(host){
           empty('Esperando a la otra persona. Código de la sala:',code.toUpperCase());
@@ -171,12 +219,13 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
           attachConn(peer.connect(PREFIX+code,{reliable:true}));
           attachCall(peer.call(PREFIX+code,stream||blankStream()));
         }
+        if(myRole==='oyente'&&SR){listening=true;syncL();startRec()}
       });
     });
   }
   function show(inCall){
     $('lobby').style.display=inCall?'none':'block';
-    $('call').style.display=inCall?'block':'none';
+    $('call').style.display=inCall?'flex':'none';
     $('compose').style.display=inCall?'block':'none';
   }
   $('btnNew').onclick=function(){
@@ -187,7 +236,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
   $('btnJoin').onclick=function(){enter($('code').value,false)};
   $('btnLeave').onclick=function(){location.reload()};
 
-  /* ---------- subtítulos de mi voz ---------- */
+  /* ---------- subtítulos de mi voz (oyente) ---------- */
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   function startRec(){
     rec=new SR();rec.lang='es-CO';rec.continuous=true;rec.interimResults=true;
@@ -195,7 +244,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
       var interim='';
       for(var i=e.resultIndex;i<e.results.length;i++){
         var r=e.results[i],t=r[0].transcript.trim();
-        if(r.isFinal){if(t){say('mine','Tú (voz)',t);sendData({k:'cap',t:t.slice(0,500),f:1})}}
+        if(r.isFinal){if(t){say(true,'Tú (voz)',t);sendData({k:'cap',t:t.slice(0,500),f:1})}}
         else interim+=t+' ';
       }
       interim=interim.trim();
@@ -223,14 +272,10 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:11px 12p
   /* ---------- mensajes escritos ---------- */
   function send(t){
     var m=$('msg');t=(t||m.value).trim();if(!t)return;
-    say('mine','Tú',t);sendData({k:'txt',t:t.slice(0,500)});m.value='';
+    say(true,'Tú',t);sendData({k:'txt',t:t.slice(0,500)});m.value='';
   }
   $('btnSend').onclick=function(){send()};
   $('msg').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();send()}});
-  ['Hola, soy una persona sorda.','Más despacio, por favor.','¿Puede repetirlo?','Sí, entiendo.','No entendí.','Gracias.'].forEach(function(t){
-    var b=document.createElement('button');b.type='button';b.textContent=t;
-    b.onclick=function(){send(t)};$('chips').appendChild(b);
-  });
 })();
 </script>
 </body>
