@@ -3,45 +3,47 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>SeñaVoz</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
-:root{--bg:#F4F6F8;--ink:#10243A;--muted:#566677;--panel:#FFFFFF;--line:#D3DBE3;--accent:#1B4F8A;--on-accent:#FFFFFF;--sig:#F2B632;--cap-bg:rgba(10,20,32,.84);--cap-ink:#FFFFFF;--cap:22px}
+:root{--bg:#F4F6F8;--ink:#10243A;--muted:#566677;--panel:#FFFFFF;--line:#D3DBE3;--accent:#1B4F8A;--on-accent:#FFFFFF;--sig:#F2B632;--cap:22px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C1520;--ink:#EAF0F6;--muted:#93A3B5;--panel:#142233;--line:#26384D;--accent:#8FBBF2;--on-accent:#0C1520}}
 :root[data-theme="dark"]{--bg:#0C1520;--ink:#EAF0F6;--muted:#93A3B5;--panel:#142233;--line:#26384D;--accent:#8FBBF2;--on-accent:#0C1520}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.45;display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top,0px)}
-header{padding:8px 14px 0;flex-shrink:0}
-h1{font-size:20px;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.4;display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top,0px)}
+header{padding:6px 12px 0;flex-shrink:0}
+h1{font-size:18px;margin:0}
 #lobby{flex:1;overflow-y:auto;padding:8px 14px 20px;max-width:720px;width:100%;margin:0 auto}
-#call{display:none;flex:1;min-height:0;flex-direction:column;max-width:720px;width:100%;margin:0 auto;padding:0 14px}
-.stage{position:relative;flex-shrink:0;height:clamp(150px,36dvh,420px);background:#0A141F;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin-top:6px}
+#call{display:none;flex:1;min-height:0;flex-direction:column;max-width:720px;width:100%;margin:0 auto;padding:0 12px}
+.stage{position:relative;flex-shrink:0;height:clamp(130px,30dvh,360px);background:#0A141F;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-top:4px}
 video{display:none;object-fit:cover}
 #rv{width:100%;height:100%}
-#lv{position:absolute;top:8px;right:8px;height:42%;aspect-ratio:3/4;border-radius:10px;border:2px solid var(--sig);transform:scaleX(-1);background:#000}
-.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#C9D6E3}
-.cap{position:absolute;left:8px;right:8px;bottom:8px;background:var(--cap-bg);color:var(--cap-ink);border-radius:10px;padding:8px 12px;font-size:var(--cap);line-height:1.3;display:none;max-height:60%;overflow:auto}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-#call .row{flex-shrink:0;margin:8px 0 4px}
-button{font:inherit;border-radius:10px;border:2px solid var(--accent);background:transparent;color:var(--accent);padding:10px 14px;min-height:46px;cursor:pointer}
+#lv{position:absolute;top:6px;right:6px;height:38%;aspect-ratio:3/4;border-radius:8px;border:2px solid var(--sig);transform:scaleX(-1);background:#000}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;color:#C9D6E3;font-size:15px}
+.cap{flex-shrink:0;margin-top:6px;height:calc(var(--cap)*2.8);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--sig);border-radius:10px;padding:6px 10px;font-size:var(--cap);line-height:1.25}
+.cap:empty::before{content:"Aquí aparecen los subtítulos";color:var(--muted);font-size:15px}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#call .row{flex-shrink:0;margin:6px 0 2px}
+button{font:inherit;font-size:14px;border-radius:8px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);padding:4px 10px;min-height:34px;cursor:pointer}
 button.main-btn,button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
 button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-offset:2px}
-.hint{color:var(--muted);font-size:15px;margin:0 0 6px;flex-shrink:0}
-#log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 8px}
-.msg{max-width:88%;padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:calc(var(--cap) - 2px)}
-.msg small{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}
+#lobby button{font-size:16px;min-height:42px;padding:8px 14px}
+.hint{color:var(--muted);font-size:14px;margin:0 0 4px;flex-shrink:0}
+#log{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding:4px 0 6px}
+.msg{max-width:88%;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:calc(var(--cap) - 4px)}
+.msg small{display:block;color:var(--muted);font-size:12px;margin-bottom:1px}
 .msg.mine{align-self:flex-end;border-color:var(--accent)}
-.compose{display:none;flex-shrink:0;background:var(--panel);border-top:1px solid var(--line);padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px))}
+.compose{display:none;flex-shrink:0;background:var(--panel);border-top:1px solid var(--line);padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px))}
 .compose .in{max-width:720px;margin:0 auto}
-.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}
-.chips button{white-space:nowrap;min-height:38px;padding:4px 12px;font-size:15px}
-.send{display:flex;gap:8px}
-input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
-.code{font-size:30px;font-weight:700;letter-spacing:.12em}
+.send{display:flex;gap:6px}
+input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px;border-radius:8px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.code{font-size:26px;font-weight:700;letter-spacing:.12em}
 .who{display:flex;gap:8px;margin:8px 0}
 .who button{flex:1}
 </style>
@@ -69,13 +71,14 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
     <video id="rv" playsinline autoplay></video>
     <video id="lv" playsinline muted autoplay></video>
     <div class="empty" id="empty"></div>
-    <div class="cap" id="cap" aria-live="polite"></div>
   </div>
+  <div class="cap" id="cap" aria-live="polite"></div>
   <div class="row">
     <button id="btnListen" aria-pressed="false">Subtitular mi voz</button>
-    <button id="btnVoice" aria-pressed="true">Leer en voz alta</button>
+    <button id="btnVoice" aria-pressed="true">Texto + voz</button>
     <button id="sm" aria-label="Letra más pequeña">A−</button>
     <button id="lg" aria-label="Letra más grande">A+</button>
+    <button id="btnFull">Pantalla completa</button>
     <button id="btnLeave">Salir</button>
   </div>
   <p class="hint" id="status"></p>
@@ -84,7 +87,6 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
 
 <div class="compose" id="compose">
   <div class="in">
-    <div class="chips" id="chips"></div>
     <form class="send" onsubmit="return false">
       <input type="text" id="msg" placeholder="Escribe un mensaje" autocomplete="off" aria-label="Mensaje">
       <button class="main-btn" id="btnSend" type="button">Enviar</button>
@@ -97,16 +99,47 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
   var $=function(id){return document.getElementById(id)};
   var PREFIX='senavoz-',peer=null,conn=null,mediaCall=null,stream=null,isHost=false;
   var myRole='',peerRole='';
-  var rec=null,listening=false,voiceOn=true,size=22,capTimer=null,lastCap=0;
-  var CHIPS={
-    sorda:['Hola, soy una persona sorda.','Más despacio, por favor.','¿Puede repetirlo?','Sí, entiendo.','No entendí.','Gracias.'],
-    oyente:['Hola, te veo y te leo.','Más despacio, por favor.','¿Puedes repetir la seña?','Entendido.','Gracias.']
-  };
+  var rec=null,listening=false,voiceOn=true,size=22,lastCap=0;
 
   /* Mantiene la pantalla fija cuando aparece el teclado */
   if(window.visualViewport){
     var fit=function(){document.body.style.height=window.visualViewport.height+'px';window.scrollTo(0,0)};
     window.visualViewport.addEventListener('resize',fit);window.visualViewport.addEventListener('scroll',fit);
+  }
+
+  /* ---------- pantalla completa ---------- */
+  function goFull(){
+    try{var d=document.documentElement;
+      if(!document.fullscreenElement&&d.requestFullscreen)d.requestFullscreen({navigationUI:'hide'}).catch(function(){});
+    }catch(e){}
+  }
+  $('btnFull').onclick=function(){
+    try{if(document.fullscreenElement)document.exitFullscreen();else goFull()}catch(e){}
+  };
+  if(!document.documentElement.requestFullscreen)$('btnFull').style.display='none';
+
+  /* ---------- puntuación del habla ---------- */
+  var Q=/^(qué|cómo|cuándo|dónde|quién|quiénes|cuál|cuáles|cuánto|cuánta|cuántos|cuántas|por qué|para qué|quien|quienes|cual|cuales|cuanto|cuantos|cuantas)\b/i;
+  function punct(t,fin){
+    t=(' '+t+' ')
+      .replace(/\s+punto y coma\b/gi,';')
+      .replace(/\s+dos puntos\b/gi,':')
+      .replace(/\s+(?:signo de )?interrogaci[oó]n\b/gi,'?')
+      .replace(/\s+(?:signo de )?exclamaci[oó]n\b/gi,'!')
+      .replace(/\s+coma\b/gi,',')
+      .replace(/\s+punto\b/gi,'.')
+      .trim();
+    if(!t)return t;
+    if(fin&&!/[.?!;:]$/.test(t))t+=Q.test(t)?'?':'.';
+    var parts=t.match(/[^.?!]+[.?!]*/g)||[t];
+    return parts.map(function(s){
+      s=s.trim();if(!s)return '';
+      var q=/\?$/.test(s)||(fin&&Q.test(s)),e=/!$/.test(s);
+      s=s.replace(/^(\S)/,function(c){return c.toUpperCase()});
+      if(q&&s[0]!=='¿')s='¿'+s.replace(/^¿/,'');
+      else if(e&&s[0]!=='¡')s='¡'+s;
+      return s;
+    }).join(' ');
   }
 
   function status(t){$('status').textContent=t}
@@ -118,10 +151,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
     d.appendChild(s);d.appendChild(p);
     var l=$('log');l.appendChild(d);l.scrollTop=l.scrollHeight;
   }
-  function showCap(t){
-    var c=$('cap');c.style.display='block';c.textContent=t;
-    clearTimeout(capTimer);capTimer=setTimeout(function(){c.style.display='none'},6000);
-  }
+  function showCap(t){var c=$('cap');c.textContent=t;c.scrollTop=c.scrollHeight}
   function speak(t){
     try{if(!voiceOn||!window.speechSynthesis)return;
       var u=new SpeechSynthesisUtterance(t);u.lang='es-CO';speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
@@ -132,6 +162,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
     var a=document.createElement('div');a.textContent=text;e.appendChild(a);
     if(code){var b=document.createElement('div');b.className='code';b.textContent=code;e.appendChild(b)}
   }
+  function remoteOn(){return $('rv').style.display==='block'}
 
   /* ---------- rol ---------- */
   function pickRole(r){
@@ -142,16 +173,12 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
   }
   $('rS').onclick=function(){pickRole('sorda')};
   $('rO').onclick=function(){pickRole('oyente')};
+  function syncV(){var b=$('btnVoice');b.setAttribute('aria-pressed',voiceOn?'true':'false');b.textContent=voiceOn?'Texto + voz':'Solo texto'}
   function applyRole(){
     var sorda=myRole==='sorda';
     $('btnListen').style.display=sorda?'none':'';
     $('btnVoice').style.display=sorda?'none':'';
-    voiceOn=!sorda;
-    var ch=$('chips');ch.innerHTML='';
-    CHIPS[myRole].forEach(function(t){
-      var b=document.createElement('button');b.type='button';b.textContent=t;
-      b.onclick=function(){send(t)};ch.appendChild(b);
-    });
+    voiceOn=!sorda;syncV();
   }
   function peerLabel(){return peerRole==='sorda'?'Persona sorda':peerRole==='oyente'?'Oyente':'La otra persona'}
 
@@ -179,7 +206,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
     conn=c;
     c.on('open',function(){
       sendData({k:'role',r:myRole});
-      status('Conectados.');if(!isHost)empty('Conectando video…');
+      status('Conectados.');if(!isHost&&!remoteOn())empty('Conectando video…');
     });
     c.on('data',function(x){
       if(!x)return;
@@ -199,6 +226,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
     code=(code||'').toLowerCase().replace(/[^a-z0-9]/g,'');
     if(code.length<3){lobby('Escribe un código de al menos 3 letras o números.');return}
     if(!window.Peer){lobby('No se pudo cargar el conector. Revisa tu internet.');return}
+    goFull();
     isHost=host;lobby('Entrando…');
     startCam().then(function(camMsg){
       peer=host?new Peer(PREFIX+code):new Peer();
@@ -234,7 +262,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
     enter(c,true);
   };
   $('btnJoin').onclick=function(){enter($('code').value,false)};
-  $('btnLeave').onclick=function(){location.reload()};
+  $('btnLeave').onclick=function(){try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}location.reload()};
 
   /* ---------- subtítulos de mi voz (oyente) ---------- */
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -244,11 +272,14 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
       var interim='';
       for(var i=e.resultIndex;i<e.results.length;i++){
         var r=e.results[i],t=r[0].transcript.trim();
-        if(r.isFinal){if(t){say(true,'Tú (voz)',t);sendData({k:'cap',t:t.slice(0,500),f:1})}}
+        if(r.isFinal){if(t){t=punct(t,true).slice(0,500);say(true,'Tú (voz)',t);showCap(t);sendData({k:'cap',t:t,f:1})}}
         else interim+=t+' ';
       }
       interim=interim.trim();
-      if(interim&&Date.now()-lastCap>300){lastCap=Date.now();sendData({k:'cap',t:interim.slice(0,500),f:0})}
+      if(interim&&Date.now()-lastCap>300){
+        lastCap=Date.now();var p=punct(interim,false).slice(0,500);
+        showCap(p);sendData({k:'cap',t:p,f:0});
+      }
     };
     rec.onerror=function(e){if(e.error==='not-allowed'||e.error==='service-not-allowed'){listening=false;syncL();status('Falta el permiso del micrófono.')}};
     rec.onend=function(){if(listening){try{rec.start()}catch(e){}}};
@@ -258,11 +289,11 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
   $('btnListen').onclick=function(){
     if(!SR){status('Los subtítulos de voz funcionan en Chrome o Edge.');return}
     listening=!listening;syncL();
-    if(listening){status('Enviando tus palabras como subtítulos.');startRec()}
+    if(listening){status('Enviando tus palabras como subtítulos. Di “coma”, “punto” o “interrogación” para puntuar.');startRec()}
     else{status('Subtítulos detenidos.');try{rec.stop()}catch(e){}}
   };
   $('btnVoice').onclick=function(){
-    voiceOn=!voiceOn;this.setAttribute('aria-pressed',voiceOn?'true':'false');
+    voiceOn=!voiceOn;syncV();
     if(!voiceOn&&window.speechSynthesis)speechSynthesis.cancel();
   };
   function setSize(n){size=Math.max(16,Math.min(44,n));document.documentElement.style.setProperty('--cap',size+'px')}
@@ -270,11 +301,11 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:18px;padding:10px 12p
   $('lg').onclick=function(){setSize(size+4)};
 
   /* ---------- mensajes escritos ---------- */
-  function send(t){
-    var m=$('msg');t=(t||m.value).trim();if(!t)return;
+  function send(){
+    var m=$('msg'),t=m.value.trim();if(!t)return;
     say(true,'Tú',t);sendData({k:'txt',t:t.slice(0,500)});m.value='';
   }
-  $('btnSend').onclick=function(){send()};
+  $('btnSend').onclick=send;
   $('msg').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();send()}});
 })();
 </script>
