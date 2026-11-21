@@ -31,6 +31,13 @@ h1{font-size:18px;margin:0}
 .hero svg{width:76px;height:76px}
 .skins{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
 #lobby .skins button{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:6px}
+.ic{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:44px;padding:0 12px}
+.ic svg{width:22px;height:22px;fill:currentColor;display:block}
+.ic .cc{font-weight:700;font-size:13px;letter-spacing:.02em;border:2px solid currentColor;border-radius:6px;padding:0 4px;line-height:1.2}
+button .slash{display:none}
+#btnMic[aria-pressed="false"] .slash{display:block}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.opt div{display:flex;gap:6px}
 .sheet{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center}
 .sheet.open{display:flex}
 .panel{background:var(--panel);color:var(--ink);width:100%;max-width:560px;max-height:88dvh;overflow-y:auto;border-radius:26px 28px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 24px rgba(0,0,0,.3)}
@@ -49,7 +56,7 @@ h1{font-size:18px;margin:0}
 .sw{width:26px;height:26px;border-radius:50%;border:1px solid currentColor;display:inline-block}
 #lobby{flex:1;overflow-y:auto;padding:8px 14px 20px;max-width:720px;width:100%;margin:0 auto}
 #call{display:none;flex:1;min-height:0;flex-direction:column;max-width:720px;width:100%;margin:0 auto;padding:0 12px}
-.stage{position:relative;flex-shrink:0;height:clamp(130px,30dvh,360px);background:#0A141F;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-top:4px}
+.stage{position:relative;flex-shrink:0;height:clamp(120px,28dvh,340px);background:#0A141F;border-radius:12px;overflow:hidden;border:1px solid var(--line);margin-top:4px}
 #grid{position:absolute;inset:0;display:grid;grid-template-columns:1fr;gap:2px}
 .tile{position:relative;display:none;min-width:0;min-height:0;background:#0A141F}
 .tile video{display:block;width:100%;height:100%;object-fit:cover}
@@ -119,16 +126,11 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
   </div>
   <div class="cap" id="cap" aria-live="polite"></div>
   <div class="row">
-    <button id="btnListen" aria-pressed="false">Subtitular mi voz</button>
-    <button id="btnVoice" aria-pressed="true">Texto + voz</button>
-    <button id="btnMic" aria-pressed="true">Micrófono: activo</button>
-    <button id="btnSnd" aria-pressed="true">Sonido: activo</button>
-    <button id="sm" aria-label="Letra más pequeña">A−</button>
-    <button id="lg" aria-label="Letra más grande">A+</button>
-    <button id="btnInv">Invitar</button>
-    <button id="btnSkin" aria-label="Cambiar aspecto" title="Cambiar aspecto"></button>
-    <button id="btnFull">Pantalla completa</button>
-    <button id="btnLeave">Salir</button>
+    <button id="btnListen" class="ic" aria-pressed="false" aria-label="Subtitular mi voz" title="Subtitular mi voz"><span class="cc">CC</span></button>
+    <button id="btnMic" class="ic" aria-pressed="false" aria-label="Micrófono" title="Micrófono"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/><path class="slash" d="M4 4L20 20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></button>
+    <button id="btnInv" class="ic" aria-label="Invitar" title="Invitar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg></button>
+    <button id="btnMore" class="ic" aria-label="Más opciones" title="Más opciones"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="19" cy="12" r="2.2"/></svg></button>
+    <button id="btnLeave" class="ic" aria-label="Salir de la sala" title="Salir de la sala"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg></button>
   </div>
   <p class="hint" id="status"></p>
   <div id="log" aria-live="polite"></div>
@@ -143,6 +145,17 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
   </div>
 </div>
 
+<div class="sheet" id="more" role="dialog" aria-modal="true" aria-label="Más opciones">
+  <div class="panel">
+    <h2>Más opciones</h2>
+    <div class="opt"><span>Tamaño de letra</span><div><button id="sm" aria-label="Letra más pequeña">A−</button><button id="lg" aria-label="Letra más grande">A+</button></div></div>
+    <div class="opt" id="optVoice"><span>Mensajes escritos</span><button id="btnVoice" aria-pressed="true">Texto + voz</button></div>
+    <div class="opt"><span>Sonido de la sala</span><button id="btnSnd" aria-pressed="true">Sonido: activo</button></div>
+    <div class="opt"><span>Aspecto</span><button id="btnSkin" aria-label="Cambiar aspecto" title="Cambiar aspecto"></button></div>
+    <div class="opt"><span>Pantalla</span><button id="btnFull">Pantalla completa</button></div>
+    <div class="row"><button id="btnCloseMore" class="main-btn">Cerrar</button></div>
+  </div>
+</div>
 <div class="sheet" id="inv" role="dialog" aria-modal="true" aria-label="Invitar a la sala">
   <div class="panel">
     <h2>Invitar a la sala</h2>
@@ -176,10 +189,10 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
   var PREFIX='senavoz-',MAX_OTHERS=2;
   var peer=null,stream=null,isHost=false,roomCode='',P={};
   var myRole='',myName='';
-  var rec=null,listening=false,voiceOn=true,size=22,lastCap=0,micOn=true,sndOn=true,outS=null;
+  var rec=null,listening=false,voiceOn=true,size=22,lastCap=0,micOn=false,sndOn=true,outS=null;
 
   /* ---------- versión y aspectos ---------- */
-  var VERSION="1.9.19"; /* formato D.H.MM: D = día de versiones, H = hora (0-23), MM = minutos */
+  var VERSION="1.10.02"; /* formato D.H.MM: D = día de versiones, H = hora (0-23), MM = minutos */
   var SKINS=[{id:"oceano",n:"Océano",a:"#1B4F8A",b:"#F4F6F8"},{id:"noche",n:"Noche",a:"#8FBBF2",b:"#0C1520"},{id:"bosque",n:"Bosque",a:"#1F6B45",b:"#F0F6F0"},{id:"atardecer",n:"Atardecer",a:"#B3441A",b:"#FFF5EB"},{id:"violeta",n:"Violeta",a:"#C3A6FF",b:"#140F24"},{id:"contraste",n:"Contraste alto",a:"#FF8A00",b:"#000000"}];
   function curSkin(){return document.documentElement.getAttribute("data-skin")}
   function setSkin(id){document.documentElement.setAttribute("data-skin",id);try{localStorage.setItem("sv-skin",id)}catch(e){}renderSkins()}
@@ -309,7 +322,7 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
   function applyRole(){
     var sorda=myRole==='sorda';
     $('btnListen').style.display=sorda?'none':'';
-    $('btnVoice').style.display=sorda?'none':'';
+    $('optVoice').style.display=sorda?'none':'';
     voiceOn=!sorda;syncV();
   }
 
@@ -319,36 +332,64 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
     c.getContext('2d').fillRect(0,0,160,120);return c.captureStream(1);
   }
   var AUD={echoCancellation:true,noiseSuppression:true,autoGainControl:true};
+  var silent=null,actx=null,micStream=null,micTrack=null,wasListening=false;
+  function silentAudio(){
+    if(silent)return silent;
+    try{var AC=window.AudioContext||window.webkitAudioContext;actx=new AC();silent=actx.createMediaStreamDestination().stream.getAudioTracks()[0]}catch(e){silent=null}
+    return silent;
+  }
   function startCam(){
     var md=navigator.mediaDevices;
     if(!md||!md.getUserMedia)return Promise.resolve('Este navegador no permite usar la cámara (la página debe abrirse con https).');
-    var tries=[{video:{facingMode:'user'},audio:AUD},{video:{facingMode:'user'},audio:false},{video:false,audio:AUD}];
-    function go(i){
-      if(i>=tries.length)return Promise.resolve('No pudimos abrir tu cámara ni tu micrófono. Puedes entrar igual y ver a las demás personas.');
-      return md.getUserMedia(tries[i]).then(function(s){
-        stream=s;
-        var hasV=s.getVideoTracks().length>0,hasA=s.getAudioTracks().length>0;
-        if(hasV){var v=$('lv');v.srcObject=new MediaStream(s.getVideoTracks());v.style.display='block'}
-        if(!hasA){micOn=false;syncM()}
-        if(hasA&&hasV)return '';
-        return hasA?'No pudimos abrir tu cámara; solo se comparte tu micrófono.':'No pudimos abrir tu micrófono; las demás personas no te oirán.';
-      }).catch(function(){return go(i+1)});
-    }
-    return go(0);
+    return md.getUserMedia({video:{facingMode:'user'},audio:false}).then(function(st){
+      stream=st;var v=$('lv');v.srcObject=st;v.style.display='block';return '';
+    }).catch(function(){return 'No pudimos abrir tu cámara. Puedes entrar igual y ver a las demás personas.'});
   }
   function outStream(){
     if(outS)return outS;
-    if(stream&&stream.getVideoTracks().length){outS=stream;return outS}
-    var b=blankStream();
-    if(stream)stream.getAudioTracks().forEach(function(t){b.addTrack(t)});
-    outS=b;return outS;
+    var vt=stream&&stream.getVideoTracks()[0];
+    if(!vt)vt=blankStream().getVideoTracks()[0];
+    var t=[vt],sa=silentAudio();if(sa)t.push(sa);
+    outS=new MediaStream(t);return outS;
+  }
+  function audioSender(c){
+    try{
+      var pc=c&&c.peerConnection;if(!pc)return null;
+      var tr=pc.getTransceivers().filter(function(x){return x.receiver&&x.receiver.track&&x.receiver.track.kind==='audio'})[0];
+      return tr?tr.sender:null;
+    }catch(e){return null}
+  }
+  function pushMic(c){var sn=audioSender(c);if(sn)sn.replaceTrack(micTrack||silent).catch(function(){})}
+  function pushMicAll(){Object.keys(P).forEach(function(k){pushMic(P[k].call)})}
+  function releaseMic(){
+    try{if(micStream)micStream.getTracks().forEach(function(t){t.stop()})}catch(e){}
+    micStream=null;micTrack=null;pushMicAll();
+  }
+  /* El micrófono y los subtítulos de voz no pueden usarse a la vez en muchos celulares: se turnan. */
+  function setMic(on){
+    if(!on){
+      micOn=false;releaseMic();syncM();
+      if(wasListening&&myRole==='oyente'){wasListening=false;setTimeout(startListening,400)}
+      return;
+    }
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){status('Este navegador no permite usar el micrófono.');return}
+    var delay=0;
+    if(listening){wasListening=true;stopListening();delay=400;status('Hablas por micrófono: los subtítulos quedan en pausa.')}
+    setTimeout(function(){
+      navigator.mediaDevices.getUserMedia({audio:AUD,video:false}).then(function(ms){
+        micStream=ms;micTrack=ms.getAudioTracks()[0];micOn=true;pushMicAll();syncM();
+      }).catch(function(){
+        micOn=false;syncM();status('No pudimos abrir el micrófono. Revisa el permiso del navegador.');
+        if(wasListening){wasListening=false;startListening()}
+      });
+    },delay);
   }
 
   /* ---------- conexiones ---------- */
   function others(except){return Object.keys(P).filter(function(k){return k!==except})}
   function attachCall(c){
     var p=getP(c.peer);p.call=c;
-    c.on('stream',function(s){p.v.srcObject=s;p.v.muted=!sndOn;p.tile.style.display='block';p.has=true;layout()});
+    c.on('stream',function(s){p.v.srcObject=s;p.v.muted=!sndOn;p.tile.style.display='block';p.has=true;layout();pushMic(c)});
     c.on('close',function(){removeP(c.peer)});
   }
   function attachConn(c){
@@ -388,7 +429,7 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
   function leave(reload){
     Object.keys(P).forEach(function(k){try{P[k].tile.remove()}catch(e){}});P={};
     try{if(peer)peer.destroy()}catch(e){}peer=null;
-    try{if(stream)stream.getTracks().forEach(function(t){t.stop()})}catch(e){}stream=null;outS=null;
+    try{if(stream)stream.getTracks().forEach(function(t){t.stop()})}catch(e){}stream=null;outS=null;try{releaseMic()}catch(e){}try{if(actx)actx.close()}catch(e){}silent=null;actx=null;
     try{if(rec){listening=false;rec.stop()}}catch(e){}
     try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
     if(reload)location.reload();else show(false);
@@ -423,7 +464,7 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
         if(!host)attachConn(peer.connect(PREFIX+code,{reliable:true})),attachCall(peer.call(PREFIX+code,outStream()));
         refreshEmpty();
         if(camMsg)status(camMsg);
-        if(myRole==='oyente'&&SR){listening=true;syncL();startRec()}
+        if(myRole==='oyente'&&SR)startListening();else setMic(true);
       });
     });
   }
@@ -461,24 +502,27 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
     rec.onend=function(){if(listening){try{rec.start()}catch(e){}}};
     try{rec.start()}catch(e){}
   }
-  function syncL(){var b=$('btnListen');b.setAttribute('aria-pressed',listening?'true':'false');b.textContent=listening?'Detener subtítulos':'Subtitular mi voz'}
+  function syncL(){var b=$('btnListen');b.setAttribute('aria-pressed',listening?'true':'false');b.title=listening?'Detener subtítulos':'Subtitular mi voz';b.setAttribute('aria-label',b.title)}
+  function startListening(){
+    if(!SR)return;
+    listening=true;syncL();
+    status('Enviando tus palabras como subtítulos. Di “coma”, “punto” o “interrogación” para puntuar.');
+    startRec();
+  }
+  function stopListening(){listening=false;syncL();try{rec.stop()}catch(e){}}
   $('btnListen').onclick=function(){
     if(!SR){status('Los subtítulos de voz funcionan en Chrome o Edge.');return}
-    listening=!listening;syncL();
-    if(listening){status('Enviando tus palabras como subtítulos. Di “coma”, “punto” o “interrogación” para puntuar.');startRec()}
-    else{status('Subtítulos detenidos.');try{rec.stop()}catch(e){}}
+    if(listening){stopListening();status('Subtítulos detenidos.');return}
+    if(micOn){setMic(false);wasListening=false;setTimeout(startListening,450)}
+    else startListening();
   };
   $('btnVoice').onclick=function(){
     voiceOn=!voiceOn;syncV();
     if(!voiceOn&&window.speechSynthesis)speechSynthesis.cancel();
   };
-  function syncM(){var b=$('btnMic');b.setAttribute('aria-pressed',micOn?'true':'false');b.textContent=micOn?'Micrófono: activo':'Micrófono: apagado'}
+  function syncM(){var b=$('btnMic');b.setAttribute('aria-pressed',micOn?'true':'false');b.title=micOn?'Apagar micrófono':'Encender micrófono';b.setAttribute('aria-label',b.title)}
   function syncS(){var b=$('btnSnd');b.setAttribute('aria-pressed',sndOn?'true':'false');b.textContent=sndOn?'Sonido: activo':'Sonido: apagado'}
-  $('btnMic').onclick=function(){
-    var a=stream?stream.getAudioTracks():[];
-    if(!a.length){status('No hay micrófono disponible. Revisa el permiso del navegador.');return}
-    micOn=!micOn;a.forEach(function(t){t.enabled=micOn});syncM();
-  };
+  $('btnMic').onclick=function(){setMic(!micOn)};
   $('btnSnd').onclick=function(){
     sndOn=!sndOn;Object.keys(P).forEach(function(k){P[k].v.muted=!sndOn});syncS();
   };
@@ -564,6 +608,11 @@ input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;
     else{invStatus(l)}
   }
   $('btnCopy').onclick=copyLink;
+
+  $('btnMore').onclick=function(){$('more').classList.add('open')};
+  function closeMore(){$('more').classList.remove('open')}
+  $('btnCloseMore').onclick=closeMore;
+  $('more').addEventListener('click',function(e){if(e.target===$('more'))closeMore()});
 
   /* Entrada directa por enlace de invitación: #sala=abcd&rol=sorda */
   (function(){
