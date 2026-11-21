@@ -63,6 +63,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
     <button id="rO" aria-pressed="false">Soy oyente</button>
   </div>
   <p>Una persona crea la sala y comparte el código con las demás.</p>
+  <p class="hint">La app usará tu cámara y tu micrófono. Dentro de la llamada podrás apagar el micrófono.</p>
   <div class="row"><button class="main-btn" id="btnNew">Crear sala</button></div>
   <form class="send" onsubmit="return false">
     <input type="text" id="code" placeholder="Código de la sala" autocomplete="off" aria-label="Código de la sala" maxlength="12" style="flex:1;margin:0">
@@ -81,6 +82,8 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
   <div class="row">
     <button id="btnListen" aria-pressed="false">Subtitular mi voz</button>
     <button id="btnVoice" aria-pressed="true">Texto + voz</button>
+    <button id="btnMic" aria-pressed="true">Micrófono: activo</button>
+    <button id="btnSnd" aria-pressed="true">Sonido: activo</button>
     <button id="sm" aria-label="Letra más pequeña">A−</button>
     <button id="lg" aria-label="Letra más grande">A+</button>
     <button id="btnFull">Pantalla completa</button>
@@ -105,7 +108,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
   var PREFIX='senavoz-',MAX_OTHERS=2;
   var peer=null,stream=null,isHost=false,roomCode='',P={};
   var myRole='',myName='';
-  var rec=null,listening=false,voiceOn=true,size=22,lastCap=0;
+  var rec=null,listening=false,voiceOn=true,size=22,lastCap=0,micOn=true,sndOn=true,outS=null;
 
   if(window.visualViewport){
     var fit=function(){document.body.style.height=window.visualViewport.height+'px';window.scrollTo(0,0)};
@@ -221,18 +224,37 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
     var c=document.createElement('canvas');c.width=160;c.height=120;
     c.getContext('2d').fillRect(0,0,160,120);return c.captureStream(1);
   }
+  var AUD={echoCancellation:true,noiseSuppression:true,autoGainControl:true};
   function startCam(){
-    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return Promise.resolve('Este navegador no permite usar la cámara (la página debe abrirse con https).');
-    return navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}).then(function(s){
-      stream=s;var v=$('lv');v.srcObject=s;v.style.display='block';return '';
-    }).catch(function(e){return 'No pudimos abrir tu cámara ('+(e.name||'error')+'). Puedes entrar igual y ver a las demás personas.'});
+    var md=navigator.mediaDevices;
+    if(!md||!md.getUserMedia)return Promise.resolve('Este navegador no permite usar la cámara (la página debe abrirse con https).');
+    var tries=[{video:{facingMode:'user'},audio:AUD},{video:{facingMode:'user'},audio:false},{video:false,audio:AUD}];
+    function go(i){
+      if(i>=tries.length)return Promise.resolve('No pudimos abrir tu cámara ni tu micrófono. Puedes entrar igual y ver a las demás personas.');
+      return md.getUserMedia(tries[i]).then(function(s){
+        stream=s;
+        var hasV=s.getVideoTracks().length>0,hasA=s.getAudioTracks().length>0;
+        if(hasV){var v=$('lv');v.srcObject=new MediaStream(s.getVideoTracks());v.style.display='block'}
+        if(!hasA){micOn=false;syncM()}
+        if(hasA&&hasV)return '';
+        return hasA?'No pudimos abrir tu cámara; solo se comparte tu micrófono.':'No pudimos abrir tu micrófono; las demás personas no te oirán.';
+      }).catch(function(){return go(i+1)});
+    }
+    return go(0);
+  }
+  function outStream(){
+    if(outS)return outS;
+    if(stream&&stream.getVideoTracks().length){outS=stream;return outS}
+    var b=blankStream();
+    if(stream)stream.getAudioTracks().forEach(function(t){b.addTrack(t)});
+    outS=b;return outS;
   }
 
   /* ---------- conexiones ---------- */
   function others(except){return Object.keys(P).filter(function(k){return k!==except})}
   function attachCall(c){
     var p=getP(c.peer);p.call=c;
-    c.on('stream',function(s){p.v.srcObject=s;p.tile.style.display='block';p.has=true;layout()});
+    c.on('stream',function(s){p.v.srcObject=s;p.v.muted=!sndOn;p.tile.style.display='block';p.has=true;layout()});
     c.on('close',function(){removeP(c.peer)});
   }
   function attachConn(c){
@@ -264,7 +286,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
   function connectTo(id){
     if(P[id]||Object.keys(P).length>=MAX_OTHERS+1)return;
     attachConn(peer.connect(id,{reliable:true}));
-    attachCall(peer.call(id,stream||blankStream()));
+    attachCall(peer.call(id,outStream()));
   }
   function full(c){
     c.on('open',function(){c.send({k:'full'});setTimeout(function(){try{c.close()}catch(e){}},400)});
@@ -272,7 +294,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
   function leave(reload){
     Object.keys(P).forEach(function(k){try{P[k].tile.remove()}catch(e){}});P={};
     try{if(peer)peer.destroy()}catch(e){}peer=null;
-    try{if(stream)stream.getTracks().forEach(function(t){t.stop()})}catch(e){}stream=null;
+    try{if(stream)stream.getTracks().forEach(function(t){t.stop()})}catch(e){}stream=null;outS=null;
     try{if(rec){listening=false;rec.stop()}}catch(e){}
     try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
     if(reload)location.reload();else show(false);
@@ -299,12 +321,12 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
       });
       peer.on('call',function(c){
         if(!P[c.peer]&&Object.keys(P).length>=MAX_OTHERS)return;
-        c.answer(stream||blankStream());attachCall(c);
+        c.answer(outStream());attachCall(c);
       });
       peer.on('open',function(){
         show(true);applyRole();
         status(camMsg||'Listo.');
-        if(!host)attachConn(peer.connect(PREFIX+code,{reliable:true})),attachCall(peer.call(PREFIX+code,stream||blankStream()));
+        if(!host)attachConn(peer.connect(PREFIX+code,{reliable:true})),attachCall(peer.call(PREFIX+code,outStream()));
         refreshEmpty();
         if(camMsg)status(camMsg);
         if(myRole==='oyente'&&SR){listening=true;syncL();startRec()}
@@ -340,7 +362,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
         lastCap=Date.now();sendAll({k:'cap',t:punct(interim,false).slice(0,500),f:0});
       }
     };
-    rec.onerror=function(e){if(e.error==='not-allowed'||e.error==='service-not-allowed'){listening=false;syncL();status('Falta el permiso del micrófono.')}};
+    rec.onerror=function(e){if(e.error==='not-allowed'||e.error==='service-not-allowed'){listening=false;syncL();status('Falta el permiso del micrófono.')}else if(e.error==='audio-capture'){status('El micrófono está ocupado. Si los subtítulos fallan, apaga “Micrófono” para usarlos.')}};
     rec.onend=function(){if(listening){try{rec.start()}catch(e){}}};
     try{rec.start()}catch(e){}
   }
@@ -354,6 +376,16 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:7px 10px
   $('btnVoice').onclick=function(){
     voiceOn=!voiceOn;syncV();
     if(!voiceOn&&window.speechSynthesis)speechSynthesis.cancel();
+  };
+  function syncM(){var b=$('btnMic');b.setAttribute('aria-pressed',micOn?'true':'false');b.textContent=micOn?'Micrófono: activo':'Micrófono: apagado'}
+  function syncS(){var b=$('btnSnd');b.setAttribute('aria-pressed',sndOn?'true':'false');b.textContent=sndOn?'Sonido: activo':'Sonido: apagado'}
+  $('btnMic').onclick=function(){
+    var a=stream?stream.getAudioTracks():[];
+    if(!a.length){status('No hay micrófono disponible. Revisa el permiso del navegador.');return}
+    micOn=!micOn;a.forEach(function(t){t.enabled=micOn});syncM();
+  };
+  $('btnSnd').onclick=function(){
+    sndOn=!sndOn;Object.keys(P).forEach(function(k){P[k].v.muted=!sndOn});syncS();
   };
   function setSize(n){size=Math.max(16,Math.min(44,n));document.documentElement.style.setProperty('--cap',size+'px')}
   $('sm').onclick=function(){setSize(size-4)};
