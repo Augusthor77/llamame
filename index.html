@@ -31,6 +31,18 @@ h1{font-size:18px;margin:0}
 .hero svg{width:76px;height:76px}
 .skins{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
 #lobby .skins button{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:6px}
+.sheet{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);align-items:flex-end;justify-content:center}
+.sheet.open{display:flex}
+.panel{background:var(--panel);color:var(--ink);width:100%;max-width:560px;max-height:88dvh;overflow-y:auto;border-radius:26px 28px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 24px rgba(0,0,0,.3)}
+.panel h2{font-size:18px;margin:0 0 6px}
+.panel .row{margin:8px 0}
+.panel .lbl{margin:10px 0 0;font-size:14px;color:var(--muted)}
+.cl{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.ct{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border:1px solid var(--line);border-radius:18px 22px 18px 24px;background:var(--bg)}
+.ct span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct small{display:block;color:var(--muted);font-size:12px}
+.ct button{min-height:34px;padding:4px 12px}
+.banner{border:1px solid var(--line);border-left:4px solid var(--sig);border-radius:14px;padding:8px 12px;margin:8px 0;background:var(--panel)}
 #foot{flex-shrink:0;text-align:center;padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));font-size:12.5px;line-height:1.4;color:var(--muted);border-top:1px solid var(--line)}
 #foot .priv{margin:0 auto 4px;max-width:520px}
 #foot .by{margin:0;font-weight:500;color:var(--ink)}
@@ -62,7 +74,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-of
 .compose{display:none;flex-shrink:0;background:var(--panel);border-top:1px solid var(--line);padding:6px 12px calc(6px + env(safe-area-inset-bottom,0px))}
 .compose .in{max-width:720px;margin:0 auto}
 .send{display:flex;gap:6px}
-input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px;border-radius:24px 22px 26px 20px / 22px 26px 20px 24px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+input[type=text],input[type=tel]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px;border-radius:24px 22px 26px 20px / 22px 26px 20px 24px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
 #lobby input[type=text]{padding:10px 12px;margin-bottom:8px;width:100%;flex:none}
 .code{font-size:26px;font-weight:700;letter-spacing:.12em}
 .who{display:flex;gap:8px;margin:8px 0}
@@ -78,12 +90,13 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px
   <p>Videollamada entre personas sordas y oyentes, en salas de hasta 3 personas.</p>
   <div class="skins" id="skins" role="group" aria-label="Aspecto"></div>
   <input type="text" id="nm" placeholder="Tu nombre" autocomplete="off" aria-label="Tu nombre" maxlength="20">
-  <p style="margin:0">¿Quién eres?</p>
-  <div class="who" role="group" aria-label="¿Quién eres?">
+  <div class="banner" id="invBanner" style="display:none"><strong>Te invitaron a una sala de SeñaVoz.</strong><br><span class="hint" style="margin:0">Escribe tu nombre y toca Entrar a la sala.</span></div>
+  <p id="whoLbl" style="margin:0">¿Quién eres?</p>
+  <div class="who" id="whoBox" role="group" aria-label="¿Quién eres?">
     <button id="rS" aria-pressed="false">Soy persona sorda</button>
     <button id="rO" aria-pressed="false">Soy oyente</button>
   </div>
-  <p>Una persona crea la sala y comparte el código con las demás.</p>
+  <p id="howTxt">Una persona crea la sala y comparte el código con las demás.</p>
   <p class="hint">La app usará tu cámara y tu micrófono. Dentro de la llamada podrás apagar el micrófono.</p>
   <div class="row"><button class="main-btn" id="btnNew">Crear sala</button></div>
   <form class="send" onsubmit="return false">
@@ -112,6 +125,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px
     <button id="btnSnd" aria-pressed="true">Sonido: activo</button>
     <button id="sm" aria-label="Letra más pequeña">A−</button>
     <button id="lg" aria-label="Letra más grande">A+</button>
+    <button id="btnInv">Invitar</button>
     <button id="btnSkin" aria-label="Cambiar aspecto" title="Cambiar aspecto"></button>
     <button id="btnFull">Pantalla completa</button>
     <button id="btnLeave">Salir</button>
@@ -129,6 +143,33 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px
   </div>
 </div>
 
+<div class="sheet" id="inv" role="dialog" aria-modal="true" aria-label="Invitar a la sala">
+  <div class="panel">
+    <h2>Invitar a la sala</h2>
+    <p class="lbl">La persona invitada es:</p>
+    <div class="row" role="group" aria-label="Rol de la persona invitada">
+      <button id="iS" aria-pressed="false">Persona sorda</button>
+      <button id="iO" aria-pressed="false">Oyente</button>
+    </div>
+    <p class="lbl">Mis contactos</p>
+    <div class="cl" id="cl"></div>
+    <div class="row">
+      <button id="btnPick" style="display:none">Elegir de mi teléfono</button>
+    </div>
+    <form class="send" onsubmit="return false" style="margin-bottom:8px">
+      <input type="text" id="cn" placeholder="Nombre" autocomplete="off" aria-label="Nombre del contacto" maxlength="40">
+      <input type="tel" id="ct" placeholder="Celular" autocomplete="off" aria-label="Celular del contacto" maxlength="20">
+      <button type="button" id="btnAdd">Guardar</button>
+    </form>
+    <p class="lbl">O comparte el enlace por otro medio</p>
+    <div class="row">
+      <button id="btnShare" class="main-btn">Compartir enlace</button>
+      <button id="btnCopy">Copiar enlace</button>
+      <button id="btnCloseInv">Cerrar</button>
+    </div>
+    <p class="hint" id="invMsg"></p>
+  </div>
+</div>
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
@@ -138,7 +179,7 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px
   var rec=null,listening=false,voiceOn=true,size=22,lastCap=0,micOn=true,sndOn=true,outS=null;
 
   /* ---------- versión y aspectos ---------- */
-  var VERSION="1.9.03"; /* formato D.H.MM: D = día de versiones, H = hora (0-23), MM = minutos */
+  var VERSION="1.9.19"; /* formato D.H.MM: D = día de versiones, H = hora (0-23), MM = minutos */
   var SKINS=[{id:"oceano",n:"Océano",a:"#1B4F8A",b:"#F4F6F8"},{id:"noche",n:"Noche",a:"#8FBBF2",b:"#0C1520"},{id:"bosque",n:"Bosque",a:"#1F6B45",b:"#F0F6F0"},{id:"atardecer",n:"Atardecer",a:"#B3441A",b:"#FFF5EB"},{id:"violeta",n:"Violeta",a:"#C3A6FF",b:"#140F24"},{id:"contraste",n:"Contraste alto",a:"#FF8A00",b:"#000000"}];
   function curSkin(){return document.documentElement.getAttribute("data-skin")}
   function setSkin(id){document.documentElement.setAttribute("data-skin",id);try{localStorage.setItem("sv-skin",id)}catch(e){}renderSkins()}
@@ -444,6 +485,103 @@ input[type=text]{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 16px
   function setSize(n){size=Math.max(16,Math.min(44,n));document.documentElement.style.setProperty('--cap',size+'px')}
   $('sm').onclick=function(){setSize(size-4)};
   $('lg').onclick=function(){setSize(size+4)};
+
+  /* ---------- invitaciones ---------- */
+  var invRole='';
+  function roomLink(){return location.href.split('#')[0]+'#sala='+roomCode+(invRole?'&rol='+invRole:'')}
+  function inviteMsg(name){
+    return 'Hola'+(name?' '+name:'')+', soy '+(myName||'un amigo')+'. Te invito a una videollamada en SeñaVoz. Entra aquí: '+roomLink();
+  }
+  function loadC(){try{return JSON.parse(localStorage.getItem('sv-contacts')||'[]')}catch(e){return []}}
+  function saveC(a){try{localStorage.setItem('sv-contacts',JSON.stringify(a.slice(0,200)))}catch(e){}}
+  function waNum(t){
+    var d=String(t||'').replace(/\D/g,'');
+    if(d.indexOf('00')===0)d=d.slice(2);
+    if(d.length===10&&d.charAt(0)==='3')d='57'+d;
+    return d;
+  }
+  function invStatus(t){$('invMsg').textContent=t}
+  function renderC(){
+    var box=$('cl'),a=loadC();box.innerHTML='';
+    if(!a.length){var e=document.createElement('p');e.className='hint';e.textContent='Aún no tienes contactos guardados.';box.appendChild(e);return}
+    a.forEach(function(c,i){
+      var d=document.createElement('div');d.className='ct';
+      var sp=document.createElement('span');sp.textContent=c.n;
+      var sm=document.createElement('small');sm.textContent=c.t;sp.appendChild(sm);
+      var w=document.createElement('button');w.type='button';w.className='main-btn';w.textContent='WhatsApp';
+      w.onclick=function(){
+        var num=waNum(c.t);
+        if(num.length<8){invStatus('El número de '+c.n+' parece incompleto.');return}
+        window.open('https://wa.me/'+num+'?text='+encodeURIComponent(inviteMsg(c.n)),'_blank');
+        invStatus('Se abrió WhatsApp con el mensaje listo. Solo falta enviarlo.');
+      };
+      var x=document.createElement('button');x.type='button';x.textContent='Quitar';x.setAttribute('aria-label','Quitar a '+c.n);
+      x.onclick=function(){var l=loadC();l.splice(i,1);saveC(l);renderC()};
+      d.appendChild(sp);d.appendChild(w);d.appendChild(x);box.appendChild(d);
+    });
+  }
+  function syncInvRole(){
+    $('iS').setAttribute('aria-pressed',invRole==='sorda'?'true':'false');
+    $('iO').setAttribute('aria-pressed',invRole==='oyente'?'true':'false');
+  }
+  $('iS').onclick=function(){invRole='sorda';syncInvRole()};
+  $('iO').onclick=function(){invRole='oyente';syncInvRole()};
+  $('btnInv').onclick=function(){
+    if(!roomCode)return;
+    if(!invRole)invRole=myRole==='sorda'?'oyente':'sorda';
+    syncInvRole();renderC();invStatus('');$('inv').classList.add('open');
+  };
+  function closeInv(){$('inv').classList.remove('open')}
+  $('btnCloseInv').onclick=closeInv;
+  $('inv').addEventListener('click',function(e){if(e.target===$('inv'))closeInv()});
+  $('btnAdd').onclick=function(){
+    var n=$('cn').value.trim(),t=$('ct').value.trim();
+    if(!n||waNum(t).length<8){invStatus('Escribe un nombre y un celular válido.');return}
+    var a=loadC();a.push({n:n.slice(0,40),t:t.slice(0,20)});saveC(a);
+    $('cn').value='';$('ct').value='';renderC();invStatus('');
+  };
+  if(navigator.contacts&&navigator.contacts.select&&window.ContactsManager)$('btnPick').style.display='';
+  $('btnPick').onclick=function(){
+    navigator.contacts.select(['name','tel'],{multiple:true}).then(function(list){
+      var a=loadC();
+      list.forEach(function(c){
+        var t=(c.tel&&c.tel[0])||'',n=(c.name&&c.name[0])||t;
+        if(!t)return;
+        if(!a.some(function(x){return waNum(x.t)===waNum(t)}))a.push({n:String(n).slice(0,40),t:String(t).slice(0,20)});
+      });
+      saveC(a);renderC();
+    }).catch(function(){});
+  };
+  $('btnShare').onclick=function(){
+    var m=inviteMsg('');
+    if(navigator.share){navigator.share({title:'SeñaVoz',text:m}).catch(function(){})}
+    else{copyLink()}
+  };
+  function copyLink(){
+    var l=roomLink();
+    function ok(){invStatus('Enlace copiado. Pégalo donde quieras.')}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(l).then(ok).catch(function(){invStatus(l)})}
+    else{invStatus(l)}
+  }
+  $('btnCopy').onclick=copyLink;
+
+  /* Entrada directa por enlace de invitación: #sala=abcd&rol=sorda */
+  (function(){
+    var p={};
+    location.hash.replace(/^#/,'').split('&').forEach(function(kv){var a=kv.split('=');if(a[0])p[a[0]]=decodeURIComponent(a[1]||'')});
+    var c=(p.sala||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(c.length<3)return;
+    $('code').value=c;
+    $('invBanner').style.display='block';
+    $('howTxt').style.display='none';
+    $('btnNew').parentNode.style.display='none';
+    $('code').parentNode.style.display='none';
+    var row=document.createElement('div');row.className='row';
+    var b=document.createElement('button');b.type='button';b.className='main-btn';b.textContent='Entrar a la sala';
+    b.onclick=function(){enter(c,false)};
+    row.appendChild(b);$('lobbyMsg').parentNode.insertBefore(row,$('lobbyMsg'));
+    if(p.rol==='sorda'||p.rol==='oyente'){pickRole(p.rol);$('whoLbl').style.display='none';$('whoBox').style.display='none'}
+  })();
 
   /* ---------- mensajes escritos ---------- */
   function send(){
